@@ -1,7 +1,7 @@
 %##########################################################################
 % Plotting the Joint Space Trajectory for the Six DOF Arm
 %##########################################################################
-function Joint_SpaceTraj(switchPose)
+function Joint_SpaceTraj()
 robot = importrobot('arm_config_547.urdf','DataFormat','row');
 viztree = interactiveRigidBodyTree(robot,"MarkerBodyName","link6");
 robot1 = viztree.RigidBodyTree;
@@ -93,16 +93,17 @@ for i=1:length(PathTime)
     title('Joint Space Trajectory');
     drawnow;
 end
-hold off;
-figure(2);
-grid on;
-plot(jTime,jState(:,1:n));
-hold all;
-plot(jTime(1:n),jState(1:n),'--');
-title('Joint Position vs Time ');
-xlabel('Time (s)')
-ylabel('Position (rad)');
-
-end
+% Remove the comments for graphs
+% hold off;
+% figure(2);
+% grid on;
+% plot(jTime,jState(:,1:n));
+% hold all;
+% plot(jTime(1:n),jState(1:n),'--');
+% title('Joint Position vs Time ');
+% xlabel('Time (s)')
+% ylabel('Position (rad)');
+% 
+% end
 
 

@@ -13,7 +13,7 @@ robot = importrobot('arm_config_547.urdf','DataFormat','row');
 %Initial joint positions
 Q = [T1 T2 T3 T4 T5 T6]';
 viztree = interactiveRigidBodyTree(robot,"MarkerBodyName","link6");
-viztree.Configuration = Q
+viztree.Configuration = Q;
 hold on
 viztree.ShowMarker = false;
 num_samples = 10000;
@@ -33,7 +33,7 @@ for i = 0:num_samples
     plot3(V(1),V(2),V(3),'.','Color','b','MarkerSize', 10)
 end
 title('Workspace of Six Dof Arm')
-viztree.Configuration = Q
+viztree.Configuration = Q;
 
 hold off
 end

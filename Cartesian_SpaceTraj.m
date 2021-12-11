@@ -85,14 +85,15 @@ for i=1:length(pathTime)
     title('Cartesian Space Trajectory');
     drawnow;
 end
-hold off;
-figure(2);
-grid on;
-plot(Rtime,Rstate(:,1:n));
-hold all;
-plot(Rtime(1:n),Rstate(1:n),'--');
-title('Joint Position vs Time ');
-xlabel('Time (s)')
-ylabel('Position (rad)');
-
-end
+% Remove the comments for graphs
+% hold off;
+% figure(2);
+% grid on;
+% plot(Rtime,Rstate(:,1:n));
+% hold all;
+% plot(Rtime(1:n),Rstate(1:n),'--');
+% title('Joint Position vs Time ');
+% xlabel('Time (s)')
+% ylabel('Position (rad)');
+% 
+% end
