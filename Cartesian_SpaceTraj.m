@@ -1,8 +1,14 @@
-function Cartesian_SpaceTraj(switchPose)
+%##########################################################################
+% Plotting the Cartesian Space Trajectory for the Six DOF Arm
+%##########################################################################
+
+function Cartesian_SpaceTraj()
 robot = importrobot('arm_config_547.urdf','DataFormat','row');
 viztree = interactiveRigidBodyTree(robot,"MarkerBodyName","link6");
 robot1 = viztree.RigidBodyTree
 ax = gca;
+
+% Setting up the equipment visualization
 plane = collisionBox(1.5,1.5,0.05);
 plane.Pose = trvec2tform([0.25 0 -0.025]);
 show(plane,'Parent', ax);
@@ -33,64 +39,60 @@ centerTable.Pose = trvec2tform([0.75 0 0.025]);
 patchObj.FaceColor = [0 1 0];
 
 
-
-
-
-currentRobotJConfig = homeConfiguration(robot1);
-% 7 joints
-numJoints = numel(currentRobotJConfig);
+currentPose = homeConfiguration(robot1);
+n = numel(currentPose);
 endEffector = 'link6';
 
-timeStep = 0.1; 
-toolSpeed = 0.1; 
-jointInit = currentRobotJConfig;
-taskInit = getTransform(robot1,jointInit,endEffector);
+tstep = 0.1; 
+effectorSpeed = 0.1; 
+tasktr = getTransform(robot1,currentPose,endEffector);
 
-% %Task-Space Trajectory
- distance= norm(tform2trvec(taskInit)-tform2trvec(rightWidget.Pose));
-% 
-% % set time
+%Cartesian-Space Trajectory
+ diff= norm(tform2trvec(tasktr)-tform2trvec(rightWidget.Pose));
+
+% set time
  initTime = 0;
- finalTime = (distance/toolSpeed) - initTime;
- trajTimes = initTime:timeStep:finalTime;
- timeInterval = [trajTimes(1); trajTimes(end)];
-% % Algorithm one
-% % Task-Space
- 
- tsMotionModel = taskSpaceMotionModel('RigidBodyTree',robot1,'EndEffectorName','link6');
- tsMotionModel.Kp(1:3,1:3) = 0;%
- tsMotionModel.Kd(1:3,1:3) = 0;
+ finalTime = (diff/effectorSpeed) - initTime;
+ pathTime = initTime:tstep:finalTime;
+ timeInterval = [pathTime(1); pathTime(end)];
 
-q0 = currentRobotJConfig; 
+% Task-Space
+ armMotionM = taskSpaceMotionModel('RigidBodyTree',robot1,'EndEffectorName','link6');
+ armMotionM.Kp(1:3,1:3) = 0;%
+ armMotionM.Kd(1:3,1:3) = 0;
+
+q0 = currentPose; 
 qd0 = zeros(size(q0));
 pose = rightWidget.Pose;
-[tTask,stateTask] = ode15s(@(t,state) exampleHelperTimeBasedTaskInputs(tsMotionModel,timeInterval,taskInit,pose,t,state),timeInterval,[q0; qd0]);
 
+%Solving the differential equation
+[Rtime,Rstate] = ode15s(@(t,state) exampleHelperTimeBasedTaskInputs(armMotionM,timeInterval,tasktr,pose,t,state),timeInterval,[q0; qd0]);
 
-show(robot1,currentRobotJConfig,'PreservePlot',false,'Frames','off');
+show(robot1,currentPose,'PreservePlot',false,'Frames','off');
 hold on
 axis([-1 1 -1 1 -0.1 1.5]);
 
-for i=1:length(trajTimes)
+for i=1:length(pathTime)
     % Current time
-    tNow= trajTimes(i);
+    tNow= pathTime(i);
     % Interpolate simulated joint positions to get configuration at current time
-    configNow = interp1(tTask,stateTask(:,1:numJoints),tNow);% Algorithm one
-    configN = configNow';
-    poseNow = getTransform(robot1,configN,endEffector);
-    viztree.ShowMarker = false;  % Hide the marker 
-    show(robot1,configN,'PreservePlot',false,'Frames','off');
-    plot3(poseNow(1,4),poseNow(2,4),poseNow(3,4),'b.','MarkerSize',20)
+    poseNow = interp1(Rtime,Rstate(:,1:n),tNow);
+    poseNow_t = poseNow';
+    fpose = getTransform(robot1,poseNow_t,endEffector);
+    viztree.ShowMarker = false; 
+    show(robot1,poseNow_t,'PreservePlot',false,'Frames','off');
+    plot3(fpose(1,4),fpose(2,4),fpose(3,4),'b.','MarkerSize',20)
+    title('Cartesian Space Trajectory');
     drawnow;
 end
- 
+hold off;
 figure(2);
 grid on;
-plot(tTask,stateTask(:,1:numJoints));
+plot(Rtime,Rstate(:,1:n));
 hold all;
-plot(tTask(1:numJoints),stateTask(1:numJoints),'--');
-title('Joint Position vs Reference ');
- xlabel('Time (s)')
+plot(Rtime(1:n),Rstate(1:n),'--');
+title('Joint Position vs Time ');
+xlabel('Time (s)')
 ylabel('Position (rad)');
 
 end

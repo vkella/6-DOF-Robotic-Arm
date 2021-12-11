@@ -1,8 +1,13 @@
+%##########################################################################
+% Plotting the Joint Space Trajectory for the Six DOF Arm
+%##########################################################################
 function Joint_SpaceTraj(switchPose)
 robot = importrobot('arm_config_547.urdf','DataFormat','row');
 viztree = interactiveRigidBodyTree(robot,"MarkerBodyName","link6");
 robot1 = viztree.RigidBodyTree;
 ax = gca;
+
+% Setting up the equipment visualization
 plane = collisionBox(1.5,1.5,0.05);
 plane.Pose = trvec2tform([0.25 0 -0.025]);
 show(plane,'Parent', ax);
@@ -32,59 +37,72 @@ centerTable.Pose = trvec2tform([0.75 0 0.025]);
 [~, patchObj] = show(centerTable,'Parent',ax);
 patchObj.FaceColor = [0 1 0];
 
-currentRobotJConfig = homeConfiguration(robot1);
-% 7 joints
-numJoints = numel(currentRobotJConfig);
+currentPose = homeConfiguration(robot1);
+% 6 joints
+n = numel(currentPose);
 endEffector = 'link6';
 
-timeStep = 0.1; 
-toolSpeed = 0.1; 
-jointInit = currentRobotJConfig;
-taskInit = getTransform(robot1,jointInit,endEffector);
+tstep = 0.1; 
+effectorSpeed = 0.1; 
+taskTr = getTransform(robot1,currentPose,endEffector);
 
 
 %Joint Space
- distance= norm(tform2trvec(taskInit)-tform2trvec(rightWidget.Pose));
+ diff= norm(tform2trvec(taskTr)-tform2trvec(rightWidget.Pose));
 
-% % set time
+% set time
  initTime = 0;
- finalTime = (distance/toolSpeed) - initTime;
- trajTimes = initTime:timeStep:finalTime;
- timeInterval = [trajTimes(1); trajTimes(end)];
+ finalTime = (diff/effectorSpeed) - initTime;
+ PathTime = initTime:tstep:finalTime;
+ timeInterval = [PathTime(1); PathTime(end)];
 
 ik = inverseKinematics('RigidBodyTree',robot1);
 ik.SolverParameters.AllowRandomRestart = false;
 weights = [1 1 1 1 1 1];
-initialGuess = wrapToPi(jointInit);
-jointFinal = ik(endEffector,rightWidget.Pose,weights,initialGuess);
-jointFinal = wrapToPi(jointFinal);
+initialGuess = wrapToPi(currentPose);
+jointFPose = ik(endEffector,rightWidget.Pose,weights,initialGuess);
+jointFPose = wrapToPi(jointFPose);
 
-jsMotionModel = jointSpaceMotionModel('RigidBodyTree',robot1,'MotionType','PDControl');
-q0 = currentRobotJConfig; 
+armMotionJ = jointSpaceMotionModel('RigidBodyTree',robot1,'MotionType','PDControl');
+q0 = currentPose; 
 qd0 = zeros(size(q0));
-qn = jointFinal;
+qn = jointFPose;
 ctrlpoints = [q0,qn];
-jointConfigArray = cubicpolytraj(ctrlpoints,timeInterval,trajTimes);
-[tJoint,stateJoint] = ode15s(@(t,state) exampleHelperTimeBasedJointInputs(jsMotionModel,timeInterval,jointConfigArray,t,state),timeInterval,[q0; qd0]);
-show(robot1,currentRobotJConfig,'PreservePlot',false,'Frames','off');
+jPointArray = cubicpolytraj(ctrlpoints,timeInterval,PathTime);
+
+%Solving the differential equation
+[jTime,jState] = ode15s(@(t,state) exampleHelperTimeBasedJointInputs(armMotionJ,timeInterval,jPointArray,t,state),timeInterval,[q0; qd0]);
+show(robot1,currentPose,'PreservePlot',false,'Frames','off');
 hold on
 axis([-1 1 -1 1 -0.1 1.5]);
-% Return to initial configuration
-show(robot1,currentRobotJConfig,'PreservePlot',false,'Frames','off');
 
-for i=1:length(trajTimes)
+% Return to initial configuration
+show(robot1,currentPose,'PreservePlot',false,'Frames','off');
+
+for i=1:length(PathTime)
     % Current time 
-    tNow= trajTimes(i);
+    tNow= PathTime(i);
     % Interpolate simulated joint positions to get configuration at current time
-    configNow = interp1(tJoint,stateJoint(:,1:numJoints),tNow);
+    poseNow = interp1(jTime,jState(:,1:n),tNow);
     viztree.ShowMarker = false;  
-    configN = configNow';
-    poseNow = getTransform(robot1,configN,endEffector);
-    show(robot1,configN,'PreservePlot',false,'Frames','off');
+    poseNow_t = poseNow';
+    fPose = getTransform(robot1,poseNow_t,endEffector);
+    show(robot1,poseNow_t,'PreservePlot',false,'Frames','off');
     view(114,18);
-    jointSpaceMarker = plot3(poseNow(1,4),poseNow(2,4),poseNow(3,4),'r.','MarkerSize',20);
+    plot3(fPose(1,4),fPose(2,4),fPose(3,4),'r.','MarkerSize',20);
+    title('Joint Space Trajectory');
     drawnow;
 end
+hold off;
+figure(2);
+grid on;
+plot(jTime,jState(:,1:n));
+hold all;
+plot(jTime(1:n),jState(1:n),'--');
+title('Joint Position vs Time ');
+xlabel('Time (s)')
+ylabel('Position (rad)');
+
 end
 
 

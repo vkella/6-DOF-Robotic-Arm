@@ -1,16 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com)
      Commit Version: 1.6.0-1-g15f4949  Build Version: 1.6.7594.29634
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot
   name="arm_config_547">
-  <material name="Black">
-    <color rgba="0.0 0.0 0.0 1.0"/>
-  </material>
-
-  <material name="Blue">
-    <color rgba="0.0 0.0 0.8 1.0"/>
-  </material>
   <link
     name="link0">
     <inertial>
@@ -35,7 +28,11 @@
         <mesh
           filename="package://arm_config_547/meshes/link0.STL" />
       </geometry>
-      <material name="Blue"/>
+      <material
+        name="">
+        <color
+          rgba="0 0 1 1" />
+      </material>
     </visual>
     <collision>
       <origin
@@ -71,7 +68,11 @@
         <mesh
           filename="package://arm_config_547/meshes/link1.STL" />
       </geometry>
-      <material name="Blue"/>
+      <material
+        name="">
+        <color
+          rgba="1 0 0 1" />
+      </material>
     </visual>
     <collision>
       <origin
@@ -120,7 +121,11 @@
         <mesh
           filename="package://arm_config_547/meshes/link2.STL" />
       </geometry>
-      <material name="Blue"/>
+      <material
+        name="">
+        <color
+          rgba="0 1 0 1" />
+      </material>
     </visual>
     <collision>
       <origin
@@ -174,7 +179,11 @@
         <mesh
           filename="package://arm_config_547/meshes/link3.STL" />
       </geometry>
-      <material name="Blue"/>
+      <material
+        name="">
+        <color
+          rgba="0 0 1 1" />
+      </material>
     </visual>
     <collision>
       <origin
@@ -228,7 +237,11 @@
         <mesh
           filename="package://arm_config_547/meshes/link4.STL" />
       </geometry>
-      <material name="Blue"/>
+      <material
+        name="">
+        <color
+          rgba="1 0 0 1" />
+      </material>
     </visual>
     <collision>
       <origin
@@ -282,7 +295,11 @@
         <mesh
           filename="package://arm_config_547/meshes/link5.STL" />
       </geometry>
-      <material name="Blue"/>
+      <material
+        name="">
+        <color
+          rgba="0 1 0 1" />
+      </material>
     </visual>
     <collision>
       <origin
@@ -331,7 +348,11 @@
         <mesh
           filename="package://arm_config_547/meshes/link6.STL" />
       </geometry>
-      <material name="Blue"/>
+      <material
+        name="">
+        <color
+          rgba="0 0 1 1" />
+      </material>
     </visual>
     <collision>
       <origin
@@ -385,7 +406,11 @@
         <mesh
           filename="package://arm_config_547/meshes/finger1.STL" />
       </geometry>
-      <material name="Black"/>
+      <material
+        name="">
+        <color
+          rgba="1 0 0 1" />
+      </material>
     </visual>
     <collision>
       <origin
@@ -399,7 +424,7 @@
   </link>
   <joint
     name="GripperJoint"
-    type="revolute">
+    type="fixed">
     <origin
       xyz="0.03 0 -0.0125"
       rpy="0 0 0" />
@@ -439,7 +464,11 @@
         <mesh
           filename="package://arm_config_547/meshes/finger2.STL" />
       </geometry>
-      <material name="Black"/>
+      <material
+        name="">
+        <color
+          rgba="1 0 0 1" />
+      </material>
     </visual>
     <collision>
       <origin
@@ -453,7 +482,7 @@
   </link>
   <joint
     name="MirrorGripperJoint"
-    type="revolute">
+    type="fixed">
     <origin
       xyz="0.03 0 0.0125"
       rpy="3.1416 0 0" />
