@@ -1,1 +1,1 @@
-# MAE-547-Team-Project
+# 6-DOF Robotic Arm
